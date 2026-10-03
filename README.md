@@ -1,170 +1,202 @@
 # 🎬 AI Video Assistant
 
-An intelligent meeting analysis tool that transcribes, summarizes, and enables interactive Q&A with video content using advanced AI technologies.
+An intelligent meeting and video analysis assistant that transforms lengthy video or meeting content into searchable, actionable knowledge using cutting-edge speech processing and Retrieval-Augmented Generation (RAG).
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-red.svg)](https://streamlit.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
+[![Render](https://img.shields.io/badge/Deploy%20to-Render-46E3B7.svg)](https://render.com/)
 
-## 🌟 Features
+---
 
-- **🎤 Multi-Source Audio Processing**: Support for YouTube URLs and local audio/video files
-- **🗣️ Advanced Transcription**: 
-  - Local Whisper model for English transcription
-  - Sarvam AI integration for Hinglish (Hindi-English) content with automatic translation
-- **📊 Intelligent Analysis**:
-  - Automatic title generation
-  - Comprehensive meeting summarization
-  - Action items extraction
-  - Key decisions identification
-  - Open questions tracking
-- **💬 Interactive RAG Chat**: Ask questions about your meeting using Retrieval-Augmented Generation
-- **🎨 Modern UI**: Beautiful, responsive Streamlit interface with dark mode and custom styling
-- **🧠 Powered by AI**: LangChain orchestration with Mistral LLM and ChromaDB vector store
+## 🌐 Live Demo & Repository
+
+- **Live Deployed Demo**: [AI Video Assistant on Render](https://ai-video-assistant.onrender.com) *(Update with your live Render URL)*
+- **GitHub Repository**: [https://github.com/anand-das19/ai-video-assistant](https://github.com/anand-das19/ai-video-assistant)
+
+> [!NOTE]
+> Hosted on Render Free Web Service. Free instances may spin down after inactivity; initial wake-up may take 45–60 seconds.
+
+---
+
+## 🎯 The Challenge Addressed
+
+Professionals and students spend hours watching recorded meetings, webinars, and lectures to extract actionable insights. **AI Video Assistant** automates this workflow:
+1. Ingests video audio from public YouTube links or local recordings.
+2. Transcribes spoken dialogue with high fidelity using OpenAI Whisper (English) or Sarvam AI (Hinglish with English translation).
+3. Synthesizes a structured meeting overview: descriptive title, executive summary, action items with owners/deadlines, key decisions, and open questions.
+4. Indexes the transcript into an isolated vector database (ChromaDB) to empower users to ask questions grounded strictly in the transcript via RAG.
+
+---
+
+## 🌟 Key Features
+
+- **Multi-Source Audio Acquisition**: Direct public YouTube URL download via `yt-dlp` and local media conversion (`.mp4`, `.mp3`, `.wav`, etc.).
+- **Automatic Audio Normalization**: Converts input audio to 16kHz mono WAV format and chunks long audio files for stable processing.
+- **Accurate Speech-to-Text**:
+  - **English**: Local OpenAI Whisper model (`small` by default, cached in-memory).
+  - **Hinglish**: Integrated Sarvam AI API for Hindi-English audio with automatic translation to English.
+- **Structured AI Insights (Mistral AI + LangChain)**:
+  - Concise Title Generation
+  - Executive Meeting Summary
+  - Action Items Extraction (Task, Owner, Deadline)
+  - Key Decisions Tracking
+  - Unresolved Questions Identification
+- **Transcript-Grounded RAG Q&A**: ChromaDB vector store paired with Mistral AI via LangChain LCEL pipelines. Answers only using transcript context to prevent hallucinations.
+- **Session-Isolated Vector Stores**: Unique temporary Chroma collections and isolated temporary directories per run to avoid cross-user data leaks.
+- **Clean & Safe Streamlit UI**: Dark-mode cybernetic dashboard with HTML-escaped text rendering to eliminate XSS/injection risks.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Speech-to-Text**: OpenAI Whisper, Sarvam AI
-- **LLM Framework**: LangChain with Mistral AI
-- **Vector Store**: ChromaDB with Sentence Transformers embeddings
-- **Frontend**: Streamlit with custom CSS
-- **Audio Processing**: yt-dlp, pydub, FFmpeg
+| Component | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Language** | Python 3.11 | Core runtime |
+| **Frontend** | Streamlit | Responsive web UI and state management |
+| **Speech-to-Text** | OpenAI Whisper / Sarvam AI | Audio transcription & Hindi-to-English translation |
+| **LLM & Orchestration**| Mistral AI (`mistral-small-latest`) & LangChain | LCEL chains for extraction, summarization, and RAG |
+| **Vector Store** | ChromaDB & Sentence Transformers | Ephemeral semantic search & context retrieval |
+| **Audio Processing** | FFmpeg, `yt-dlp`, `pydub` | Video audio extraction, format conversion & chunking |
+| **Containerization** | Docker | Reproducible container runtime for cloud deployment |
 
-## 📋 Prerequisites
+---
 
-- Python 3.10 or higher
-- FFmpeg (must be installed separately and available in PATH)
-- Mistral API Key (for LLM features)
-- Sarvam API Key (optional, only for Hinglish transcription)
+## 📋 Prerequisites & System Requirements
 
-## 🛠️ Installation
+- **Python**: Version `3.10` or `3.11` (Python `3.11` recommended)
+- **FFmpeg**: **Required system package**. FFmpeg must be installed and available on the system PATH for audio conversion.
+  - **Ubuntu / Debian**: `sudo apt update && sudo apt install -y ffmpeg`
+  - **macOS**: `brew install ffmpeg`
+  - **Windows**: Install via `winget install Gyan.FFmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html) and add `bin/` to system PATH.
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the root directory (see `.env.example`):
+
+| Variable | Required | Description |
+| :--- | :--- | :--- |
+| `MISTRAL_API_KEY` | **Yes** | API key from [Mistral AI Console](https://console.mistral.ai/) |
+| `SARVAM_API_KEY` | Optional | API key from [Sarvam AI](https://www.sarvam.ai/) (for Hinglish audio) |
+| `WHISPER_MODEL` | Optional | Whisper model size (`tiny`, `base`, `small`, `medium`, `large`). Defaults to `small`. |
+| `SARVAM_STT_MODEL` | Optional | Sarvam model identifier. Defaults to `saaras:v2.5`. |
+
+> [!WARNING]
+> Never commit `.env` or real API keys to version control. Set keys directly in your cloud hosting provider's dashboard.
+
+---
+
+## 🛠️ Local Setup Instructions
 
 1. **Clone the repository**
-```bash
-git clone https://github.com/yourusername/AI-Video-Assistant.git
-cd AI-Video-Assistant
-```
+   ```bash
+   git clone https://github.com/yourusername/AI-Video-Assistant.git
+   cd AI-Video-Assistant
+   ```
 
-2. **Install FFmpeg**
-   - **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
-   - **macOS**: `brew install ffmpeg`
-   - **Linux**: `sudo apt install ffmpeg`
+2. **Create and activate a virtual environment**
+   ```bash
+   python -m venv venv
+   # On Windows:
+   .\venv\Scripts\activate
+   # On Linux/macOS:
+   source venv/bin/activate
+   ```
 
-3. **Install Python dependencies**
-```bash
-pip install -r Requirements.txt
-```
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. **Set up environment variables**
+4. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual MISTRAL_API_KEY
+   ```
 
-Create a `.env` file in the project root:
+5. **Run the Streamlit application**
+   ```bash
+   streamlit run app.py
+   ```
 
-```env
-# Required for LLM features
-MISTRAL_API_KEY=your_mistral_api_key_here
+6. **Run via CLI (optional)**
+   ```bash
+   python main.py
+   ```
 
-# Optional: for Hinglish transcription
-SARVAM_API_KEY=your_sarvam_api_key_here
+---
 
-# Optional: Whisper model size (tiny, base, small, medium, large)
-WHISPER_MODEL=small
+## ☁️ Deployment on Render (Free Web Service)
 
-# Optional: Sarvam model version
-SARVAM_STT_MODEL=saaras:v2.5
-```
+This repository includes a production-ready `Dockerfile` and `render.yaml` for zero-configuration deployment on Render.
 
-**Get API Keys:**
-- Mistral API: [console.mistral.ai](https://console.mistral.ai/)
-- Sarvam AI: [sarvam.ai](https://www.sarvam.ai/)
+### Option A: Automatic Blueprint Deployment (Recommended)
+1. Fork or push this repository to your GitHub account.
+2. In [Render Dashboard](https://dashboard.render.com/), click **New +** > **Blueprint**.
+3. Connect your repository. Render will automatically detect `render.yaml`.
+4. Add your `MISTRAL_API_KEY` (and optionally `SARVAM_API_KEY`) under Environment Variables.
+5. Click **Apply**.
 
-## 🎯 Usage
+### Option B: Manual Docker Web Service
+1. In Render Dashboard, click **New +** > **Web Service**.
+2. Select **Build and deploy from a Git repository**.
+3. Choose **Docker** as the Environment / Runtime.
+4. Set the **Instance Type** to **Free**.
+5. Add Environment Variables:
+   - `MISTRAL_API_KEY`: *your-mistral-api-key*
+   - `SARVAM_API_KEY`: *(optional)*
+   - `WHISPER_MODEL`: `small`
+6. Click **Create Web Service**.
 
-### Web Interface (Streamlit)
+### Runtime & Port Binding Details
+- Streamlit binds to `0.0.0.0` and listens on Render's dynamic `$PORT`:
+  ```bash
+  streamlit run app.py --server.address 0.0.0.0 --server.port $PORT
+  ```
+- The Whisper model is loaded and cached in memory to avoid repeated loads on subsequent requests.
+- All downloaded audio files and WAV chunks are stored in an isolated temporary directory and automatically deleted in a `finally` block once transcription completes.
 
-Launch the interactive web application:
+---
 
-```bash
-streamlit run app.py
-```
+## ⚠️ Known Limitations & Evaluation Notes
 
-Then:
-1. Enter a YouTube URL or local file path in the sidebar
-2. Select language (English or Hinglish)
-3. Click "⚡ Analyse"
-4. View transcription, summary, action items, and key insights
-5. Chat with your meeting content using the RAG interface
+1. **Free CPU Latency**: Whisper model execution runs on CPU in Render's Free tier. The first transcription request can take 1–2 minutes as the model loads into RAM. For testing and evaluation, shorter YouTube videos (2–5 minutes) are recommended.
+2. **Ephemeral Storage**: Render Free Web Services use ephemeral disks. Downloaded audio and vector database indices exist only for the duration of the analysis session.
+3. **Free Tier Inactivity**: When idle for 15+ minutes, Render spins down free containers. The first request after idle will experience a spin-up delay (~50 seconds).
+4. **Browser Inputs**: Cloud deployment supports public YouTube URLs. Local file path inputs are intended for local development only.
 
-### Command Line Interface
+---
 
-Run the CLI version:
-
-```bash
-python main.py
-```
-
-Follow the prompts to:
-- Enter video source (YouTube URL or file path)
-- Select language
-- View analysis results
-- Interact with the RAG chat interface
-
-## 📂 Project Structure
+## 📂 Project Architecture
 
 ```
 AI-Video-Assistant/
-├── app.py                 # Streamlit web interface
-├── main.py                # CLI interface
-├── Requirements.txt       # Python dependencies
-├── .env                   # Environment variables (create this)
-├── .gitignore            # Git ignore rules
+├── .env.example           # Example environment variable template
+├── .gitignore             # Git ignore configuration
+├── .dockerignore          # Docker build exclusion rules
+├── .python-version        # Declared Python version (3.11.9)
+├── Dockerfile             # Production container definition (Debian + FFmpeg)
+├── render.yaml            # Render Blueprint deployment configuration
+├── requirements.txt       # Production Python dependencies
+├── app.py                 # Streamlit web application
+├── main.py                # Command-line interface
+├── test.py                # End-to-end integration test script
 │
-├── core/                  # Core processing modules
-│   ├── transcriber.py    # Audio transcription (Whisper/Sarvam)
-│   ├── summarizer.py     # Text summarization & title generation
-│   ├── extractor.py      # Extract action items, decisions, questions
-│   ├── rag_engine.py     # RAG pipeline with ChromaDB
-│   └── vector_store.py   # Vector store management
+├── core/                  # Core AI & RAG Engine
+│   ├── transcriber.py     # Whisper & Sarvam speech-to-text with caching
+│   ├── summarizer.py      # Map-reduce summarization & title generation
+│   ├── extractor.py       # Action items, key decisions & questions extraction
+│   ├── rag_engine.py      # Transcript-grounded RAG query pipeline
+│   └── vector_store.py    # Session-isolated ChromaDB vector storage
 │
-└── utils/                 # Utility modules
-    └── audio_processor.py # Audio extraction and processing
+└── utils/                 # Audio & Media Utilities
+    └── audio_processor.py # yt-dlp downloader, FFmpeg converter & chunking
 ```
 
-## 🔧 Configuration
+---
 
-### Whisper Model Selection
+## 📄 License
 
-Choose the appropriate model based on your needs:
-
-| Model  | Size  | Speed | Accuracy | VRAM    |
-|--------|-------|-------|----------|---------|
-| tiny   | 39M   | Fast  | Basic    | ~1GB    |
-| base   | 74M   | Fast  | Good     | ~1GB    |
-| small  | 244M  | Medium| Better   | ~2GB    |
-| medium | 769M  | Slow  | Great    | ~5GB    |
-| large  | 1550M | Slower| Best     | ~10GB   |
-
-Set in `.env`: `WHISPER_MODEL=small`
-
-### Language Support
-
-- **English**: Uses local Whisper model for transcription
-- **Hinglish**: Uses Sarvam AI for transcription with automatic translation to English
-
-## 🎨 Features Showcase
-
-### Pipeline Stages
-1. **Audio Processing**: Extract and prepare audio from various sources
-2. **Transcription**: Convert speech to text with high accuracy
-3. **Title Generation**: AI-generated descriptive titles
-4. **Summarization**: Concise meeting summaries
-5. **Extraction**: Automatic identification of action items, decisions, and questions
-6. **RAG Engine**: Build searchable knowledge base for interactive Q&A
-
-### RAG Chat Examples
-- "What were the main decisions made in this meeting?"
-- "List all action items assigned to the team"
-- "What questions remain unanswered?"
-- "Summarize the discussion about the project timeline"
-
-
-**⭐ If you find this project useful, please consider giving it a star!**
+This project is licensed under the MIT License.

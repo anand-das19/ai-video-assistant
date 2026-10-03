@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: ai-video-assistant
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: WHISPER_MODEL
+        value: small
